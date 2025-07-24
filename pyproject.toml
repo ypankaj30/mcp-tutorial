@@ -1,0 +1,54 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-tutorial"
+version = "0.1.0"
+description = "Comprehensive tutorial project demonstrating Model Context Protocol (MCP) implementations with both client and server components"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    # Core MCP dependencies
+    "mcp>=1.10.1",
+    
+    # AI Model clients
+    "anthropic>=0.57.1",
+    "google-generativeai>=0.8.0",
+    
+    # HTTP client and server
+    "httpx>=0.28.1",
+    "fastapi>=0.116.1",
+    "uvicorn>=0.35.0",
+    
+    # Utilities
+    "python-dotenv>=1.1.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "black>=23.0.0",
+    "isort>=5.12.0",
+    "mypy>=1.0.0",
+]
+
+[tool.setuptools.packages.find]
+include = ["mcp_client*", "mcp_server*"]
+
+# Black configuration
+[tool.black]
+line-length = 88
+target-version = ['py310']
+
+# isort configuration
+[tool.isort]
+profile = "black"
+line_length = 88
+
+# mypy configuration
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
