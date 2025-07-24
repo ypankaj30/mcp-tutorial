@@ -6,6 +6,8 @@ A comprehensive tutorial project demonstrating Model Context Protocol (MCP) impl
 
 ```
 mcp-tutorial/
+├── .git/                      # Git repository (unified)
+├── .gitignore                 # Git ignore rules (unified)
 ├── .venv/                     # Unified virtual environment
 ├── .env                       # Environment variables (API keys)
 ├── pyproject.toml            # Unified dependencies and configuration
@@ -304,6 +306,30 @@ Ask questions like:
 - [Anthropic Python SDK](https://github.com/anthropics/anthropic-sdk-python)
 
 ## 🤝 Contributing
+
+### Version Control Setup
+
+This project uses a unified git repository at the root level:
+
+```bash
+# Initialize git repository (if cloning, this is already done)
+git init
+
+# Add and commit project files
+git add .
+git commit -m "Initial commit: MCP tutorial project"
+
+# The .gitignore automatically excludes:
+# - Virtual environments (.venv/)
+# - Environment files (.env)
+# - Python cache files (__pycache__/)
+# - Build artifacts (*.egg-info/, dist/, build/)
+# - IDE files (.vscode/, .idea/)
+# - OS-specific files (.DS_Store, Thumbs.db)
+# - Logs and temporary files
+```
+
+### Development Workflow
 
 1. Fork the repository
 2. Create a feature branch
