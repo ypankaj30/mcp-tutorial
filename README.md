@@ -2,6 +2,24 @@
 
 A comprehensive tutorial project demonstrating Model Context Protocol (MCP) implementations with both client and server components, supporting multiple AI models and deployment patterns.
 
+## 🌟 New: NASA MCP Integration
+
+🚀 **Complete NASA API integration with GUI client!**
+
+Try the NASA demo:
+```bash
+python nasa_demo.py
+```
+
+Features:
+- 🌌 **Astronomy Picture of the Day** viewer
+- 🚀 **Mars Rover Photos** browser 
+- 🌍 **Near Earth Objects** tracker
+- 🖥️ **Tkinter GUI** with image display
+- 🌐 **HTTP API** for remote access
+
+See [NASA_QUICKSTART.md](NASA_QUICKSTART.md) for full details!
+
 ## 📁 Project Structure
 
 ```
@@ -13,14 +31,22 @@ mcp-tutorial/
 ├── pyproject.toml            # Unified dependencies and configuration
 ├── setup.sh                  # Quick setup script
 ├── README.md                 # This comprehensive guide
+├── NASA_QUICKSTART.md        # NASA integration quick start
+├── nasa_demo.py              # NASA demo launcher
+├── test_nasa.py              # NASA components test suite
 ├── mcp-client/               # MCP clients for different AI models
 │   ├── clients/
 │   │   ├── anthropic/        # Claude MCP clients
-│   │   └── gemini/          # Google Gemini MCP clients
+│   │   ├── gemini/          # Google Gemini MCP clients
+│   │   └── nasa/            # NASA GUI client
+│   │       └── nasa_gui_client.py
 │   ├── server_wrapper/      # HTTP server wrappers
+│   │   ├── nasa_http_server_sync.py # NASA HTTP wrapper
+│   │   └── mcp_*.py         # Other HTTP wrappers
 │   ├── utils/              # Debugging tools
 │   └── docs/               # Client-specific documentation
 └── mcp-server/             # MCP server implementations
+    ├── nasa_server.py      # NASA APIs MCP server
     ├── weather_server.py   # Weather data MCP server
     └── main.py            # Main server entry point
 ```
