@@ -301,12 +301,15 @@ curl -X POST http://localhost:8001/call \
   }'
 ```
 
-#### Step 4: Launch Web App 🚀
+#### Step 4: Launch Web App with AI Integration 🚀
 
 ```bash
 # Install web dependencies
 cd mcp-client/clients/nasa/web
 pip install -r requirements.txt
+
+# Ensure you have GEMINI_API_KEY in your .env file (in mcp-tutorial root directory)
+# The web app uses Google Gemini for intelligent natural language query parsing
 
 # Start the Streamlit web app (make sure HTTP server is running)
 streamlit run nasa_streamlit_app.py --server.port=8501
@@ -319,23 +322,19 @@ The web app will be available at: **http://localhost:8501**
 
 **Features:**
 - 🌌 Space-themed UI with animated stars and shooting stars
-- 💬 Natural language queries (e.g., "Show me today's astronomy picture")
+- 🤖 **Built-in Gemini AI integration** for intelligent natural language query parsing
+- 💬 Natural language queries (e.g., "Show me today's astronomy picture", "closest asteroid on April 13th 2029")
 - 🖼️ Automatic image display for NASA photos
 - 📱 Responsive design for desktop and mobile
 - ⚡ Real-time data from NASA APIs
 
-#### Step 5: Connect NASA with AI Models
+**AI-Powered Query Examples:**
+- "Get today's astronomy picture and explain what we're seeing"
+- "Show me recent photos from the Curiosity rover"
+- "What asteroids are approaching Earth this week?"
+- "Find the closest asteroid on April 13th 2029"
 
-```bash
-# Use NASA tools with Gemini (requires GEMINI_API_KEY in .env)
-cd mcp-client/clients/gemini
-python client_gemini_http.py http://localhost:8001
-
-# Ask questions like:
-# "Get today's astronomy picture and explain what we're seeing"
-# "Show me recent photos from the Curiosity rover"
-# "What asteroids are approaching Earth this week?"
-```
+**Note:** The web app requires a GEMINI_API_KEY in your `.env` file for intelligent query parsing. Without it, the app falls back to regex-based parsing with limited functionality.
 
 ### NASA Tools Available
 
@@ -544,6 +543,27 @@ git commit -m "Initial commit: MCP tutorial project"
 3. Make your changes
 4. Test thoroughly with both local and remote setups
 5. Submit a pull request
+
+## 🌌 Data Sources & Credits
+
+### NASA Open Data APIs
+
+This project uses data from NASA's public APIs, which provide free access to NASA's vast collection of space imagery, data, and information:
+
+- **NASA Open Data Portal**: [https://api.nasa.gov/](https://api.nasa.gov/)
+- **Astronomy Picture of the Day (APOD)**: Daily space images and explanations
+- **Mars Rover Photos**: Images from NASA's Mars exploration missions
+- **Near Earth Object Web Service (NeoWs)**: Asteroid and comet tracking data
+
+### Attribution
+
+- **NASA**: National Aeronautics and Space Administration
+- **Data License**: NASA data is generally in the public domain
+- **API Documentation**: [NASA API Documentation](https://api.nasa.gov/)
+
+We thank NASA for making this incredible data freely available to developers, researchers, and space enthusiasts worldwide. 🚀
+
+*"NASA's mission is to pioneer the future in space exploration, scientific discovery and aeronautics research."*
 
 ## 📄 License
 
