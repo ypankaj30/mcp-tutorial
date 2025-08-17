@@ -2,6 +2,10 @@
 
 A comprehensive tutorial project demonstrating Model Context Protocol (MCP) implementations with both client and server components, supporting multiple AI models and deployment patterns.
 
+![NASA Space Explorer Web App](space_explorer.jpg)
+
+*🚀 NASA Space Explorer - A beautiful web interface showcasing MCP integration with NASA APIs, featuring space-themed UI and intelligent natural language queries powered by Google Gemini.*
+
 ## 🌟 NASA MCP Integration
 
 🚀 **Complete NASA API integration with web client!**
