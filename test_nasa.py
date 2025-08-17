@@ -107,12 +107,12 @@ async def test_nasa_http_server():
     
     try:
         async with httpx.AsyncClient(timeout=10.0) as client:
-            # Test health endpoint
-            health_response = await client.get(f"{server_url}/health")
-            if health_response.status_code == 200:
-                print("✅ NASA HTTP Server health check passed")
+            # Test status endpoint (root)
+            status_response = await client.get(f"{server_url}/")
+            if status_response.status_code == 200:
+                print("✅ NASA HTTP Server status check passed")
             else:
-                print(f"❌ Health check failed: {health_response.status_code}")
+                print(f"❌ Status check failed: {status_response.status_code}")
                 return False
             
             # Test tools listing
@@ -162,74 +162,35 @@ async def test_nasa_http_server():
             
     except httpx.ConnectError:
         print("❌ Cannot connect to NASA HTTP Server")
-        print("   Make sure the server is running: python nasa_demo.py --server-only")
+        print("   Start server: cd mcp-server/server_wrapper && python nasa_http_server_sync.py --port 8001")
         return False
     except Exception as e:
         print(f"❌ Error testing NASA HTTP Server: {e}")
         return False
-
-def test_gui_dependencies():
-    """Test GUI client dependencies"""
-    print("\n🧪 Testing GUI Dependencies...")
-    
-    try:
-        import tkinter as tk
-        print("✅ Tkinter available")
-        
-        # Test if we can create a root window
-        root = tk.Tk()
-        root.withdraw()  # Hide the window
-        root.destroy()
-        print("✅ Tkinter window creation works")
-        
-    except ImportError:
-        print("❌ Tkinter not available")
-        return False
-    except Exception as e:
-        print(f"❌ Tkinter error: {e}")
-        return False
-    
-    try:
-        from PIL import Image, ImageTk
-        print("✅ Pillow (PIL) available")
-    except ImportError:
-        print("❌ Pillow (PIL) not available")
-        return False
-    
-    try:
-        import httpx
-        print("✅ HTTPX available")
-    except ImportError:
-        print("❌ HTTPX not available")
-        return False
-    
-    print("✅ All GUI dependencies available")
-    return True
 
 async def main():
     """Run all tests"""
     print("🚀 NASA MCP Component Tests")
     print("=" * 40)
     
-    # Test dependencies
-    deps_ok = test_gui_dependencies()
-    
     # Test direct server
     server_ok = await test_nasa_server_direct()
     
     # Test HTTP server (may not be running)
-    print("\n💡 Testing HTTP server (start with: python nasa_demo.py --server-only)")
+    print("\n💡 Testing HTTP server")
+    print("   Start server with: cd mcp-server/server_wrapper && python nasa_http_server_sync.py --port 8001")
     http_ok = await test_nasa_http_server()
     
     print("\n📊 Test Results:")
-    print(f"   Dependencies: {'✅' if deps_ok else '❌'}")
     print(f"   NASA MCP Server: {'✅' if server_ok else '❌'}")
     print(f"   NASA HTTP Server: {'✅' if http_ok else '❌'}")
     
-    if deps_ok and server_ok:
+    if server_ok:
         print("\n🎉 Core NASA MCP components are working!")
         if not http_ok:
-            print("💡 To test the full system, run: python nasa_demo.py")
+            print("💡 To test HTTP server:")
+            print("   Terminal 1: cd mcp-server/server_wrapper && python nasa_http_server_sync.py --port 8001")
+            print("   Terminal 2: cd mcp-client/clients/nasa/web && streamlit run nasa_streamlit_app.py")
     else:
         print("\n❌ Some components have issues")
         return 1

@@ -2,23 +2,41 @@
 
 A comprehensive tutorial project demonstrating Model Context Protocol (MCP) implementations with both client and server components, supporting multiple AI models and deployment patterns.
 
-## 🌟 New: NASA MCP Integration
+## 🌟 NASA MCP Integration
 
-🚀 **Complete NASA API integration with GUI client!**
+🚀 **Complete NASA API integration with web client!**
 
-Try the NASA demo:
+**Learn MCP by running each component individually:**
+
+### 1. Start NASA MCP Server (stdio)
 ```bash
-python nasa_demo.py
+cd mcp-server
+python nasa_server.py
 ```
 
-Features:
+### 2. Start NASA HTTP Server Wrapper
+```bash
+cd mcp-server/server_wrapper
+python nasa_http_server_sync.py --port 8001
+```
+
+### 3. Start NASA Web App
+```bash
+cd mcp-client/clients/nasa/web
+streamlit run nasa_streamlit_app.py --server.port=8501
+```
+
+### 4. Test NASA Components
+```bash
+python test_nasa.py
+```
+
+**Features:**
 - 🌌 **Astronomy Picture of the Day** viewer
 - 🚀 **Mars Rover Photos** browser 
 - 🌍 **Near Earth Objects** tracker
-- 🖥️ **Tkinter GUI** with image display
+- 🌐 **Streamlit Web App** with space-themed UI
 - 🌐 **HTTP API** for remote access
-
-See [NASA_QUICKSTART.md](NASA_QUICKSTART.md) for full details!
 
 ## 📁 Project Structure
 
@@ -31,24 +49,25 @@ mcp-tutorial/
 ├── pyproject.toml            # Unified dependencies and configuration
 ├── setup.sh                  # Quick setup script
 ├── README.md                 # This comprehensive guide
-├── NASA_QUICKSTART.md        # NASA integration quick start
-├── nasa_demo.py              # NASA demo launcher
 ├── test_nasa.py              # NASA components test suite
 ├── mcp-client/               # MCP clients for different AI models
 │   ├── clients/
 │   │   ├── anthropic/        # Claude MCP clients
 │   │   ├── gemini/          # Google Gemini MCP clients
-│   │   └── nasa/            # NASA GUI client
-│   │       └── nasa_gui_client.py
-│   ├── server_wrapper/      # HTTP server wrappers
-│   │   ├── nasa_http_server_sync.py # NASA HTTP wrapper
-│   │   └── mcp_*.py         # Other HTTP wrappers
-│   ├── utils/              # Debugging tools
-│   └── docs/               # Client-specific documentation
+│   │   └── nasa/            # NASA Web clients
+│   │       └── web/         # Streamlit web app
+│   │           ├── nasa_streamlit_app.py
+│   │           ├── run_web_app.py
+│   │           ├── requirements.txt
+│   │           └── README.md
+│   └── utils/              # Debugging tools
 └── mcp-server/             # MCP server implementations
     ├── nasa_server.py      # NASA APIs MCP server
     ├── weather_server.py   # Weather data MCP server
-    └── main.py            # Main server entry point
+    ├── main.py            # Main server entry point
+    └── server_wrapper/    # HTTP server wrappers
+        ├── nasa_http_server_sync.py # NASA HTTP wrapper
+        └── mcp_*.py       # Other HTTP wrappers
 ```
 
 ## 🚀 Quick Start
@@ -110,10 +129,12 @@ ANTHROPIC_API_KEY=your_anthropic_api_key_here
 - **Gemini HTTP**: `clients/gemini/client_gemini_http.py`
 - **Gemini SSE**: `clients/gemini/client_gemini_remote.py`
 
+### Available Implementations
+
 #### Server Wrappers
-- **Sync HTTP Wrapper**: `server_wrapper/mcp_http_server_sync.py` (recommended)
-- **Async HTTP Wrapper**: `server_wrapper/mcp_http_server_async.py`
-- **SSE Wrapper**: `server_wrapper/mcp_server_remote.py`
+- **Sync HTTP Wrapper**: `mcp-server/server_wrapper/mcp_http_server_sync_remote.py` (recommended)
+- **Async HTTP Wrapper**: `mcp-server/server_wrapper/mcp_http_server_async_remote.py`
+- **SSE Wrapper**: `mcp-server/server_wrapper/mcp_sse_server_remote.py`
 
 #### Utilities
 - **Debug Tool**: `utils/debug_mcp.py` - MCP protocol debugging and testing
@@ -136,8 +157,8 @@ uv run python client_gemini_local.py ../../../mcp-server/weather_server.py
 
 ```bash
 # Terminal 1: Start HTTP server wrapper (from mcp-tutorial root)
-cd mcp-client/server_wrapper
-uv run python mcp_http_server_sync_remote.py ../../mcp-server/weather_server.py 8000
+cd mcp-server/server_wrapper
+uv run python mcp_http_server_sync_remote.py ../weather_server.py 8000
 
 # Terminal 2: Connect with HTTP client (from mcp-tutorial root)
 cd mcp-client/clients/gemini
@@ -148,8 +169,8 @@ uv run python client_gemini_http_remote.py http://localhost:8000
 
 ```bash
 # Terminal 1: Start SSE server wrapper (from mcp-tutorial root)
-cd mcp-client/server_wrapper
-uv run python mcp_sse_server_remote.py ../../mcp-server/weather_server.py 8000
+cd mcp-server/server_wrapper
+uv run python mcp_sse_server_remote.py ../weather_server.py 8000
 
 # Terminal 2: Connect with SSE client (from mcp-tutorial root)
 cd mcp-client/clients/gemini
@@ -194,6 +215,167 @@ uv run python client_gemini_remote.py http://localhost:8000/sse
 cd mcp-client/utils
 uv run python debug_mcp.py http://localhost:8000
 ```
+
+## 🌌 NASA MCP Integration (Advanced Tutorial)
+
+The NASA integration demonstrates a complete MCP ecosystem with web components:
+
+### Components Overview
+
+- **NASA MCP Server** (`mcp-server/nasa_server.py`): Provides 3 NASA API tools
+- **HTTP Wrapper** (`mcp-server/server_wrapper/nasa_http_server_sync.py`): REST API for remote access
+- **Web App** (`mcp-client/clients/nasa/web/nasa_streamlit_app.py`): Beautiful Streamlit web interface with space theme
+
+### Step-by-Step Tutorial
+
+#### Step 1: Test NASA MCP Server Directly
+
+```bash
+# Start the NASA MCP server in stdio mode
+cd mcp-server
+python nasa_server.py
+
+# In another terminal, test with manual JSON-RPC
+echo '{"jsonrpc": "2.0", "method": "initialize", "params": {"protocolVersion": "2024-11-05", "capabilities": {}, "clientInfo": {"name": "test", "version": "1.0.0"}}, "id": 1}' | python nasa_server.py
+```
+
+#### Step 2: Start HTTP Server Wrapper
+
+```bash
+# Start the HTTP wrapper (exposes MCP server via REST API)
+cd mcp-server/server_wrapper
+python nasa_http_server_sync.py --port 8001
+
+# Test the HTTP endpoints
+curl http://localhost:8001/                    # Status
+curl http://localhost:8001/tools               # List tools
+```
+
+#### Step 3: Test NASA Tools via HTTP
+
+```bash
+# Get today's Astronomy Picture of the Day
+curl -X POST http://localhost:8001/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "get_astronomy_picture_of_the_day",
+      "arguments": {}
+    },
+    "id": 1
+  }'
+
+# Search Mars Rover photos
+curl -X POST http://localhost:8001/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "search_mars_rover_photos",
+      "arguments": {
+        "rover_name": "curiosity",
+        "sol": 1000,
+        "camera": "NAVCAM"
+      }
+    },
+    "id": 1
+  }'
+
+# Get Near Earth Objects
+curl -X POST http://localhost:8001/call \
+  -H "Content-Type: application/json" \
+  -d '{
+    "jsonrpc": "2.0",
+    "method": "tools/call",
+    "params": {
+      "name": "get_near_earth_objects",
+      "arguments": {
+        "start_date": "2025-08-03",
+        "end_date": "2025-08-10"
+      }
+    },
+    "id": 1
+  }'
+```
+
+#### Step 4: Launch Web App 🚀
+
+```bash
+# Install web dependencies
+cd mcp-client/clients/nasa/web
+pip install -r requirements.txt
+
+# Start the Streamlit web app (make sure HTTP server is running)
+streamlit run nasa_streamlit_app.py --server.port=8501
+
+# Or use the launcher script
+python run_web_app.py
+```
+
+The web app will be available at: **http://localhost:8501**
+
+**Features:**
+- 🌌 Space-themed UI with animated stars and shooting stars
+- 💬 Natural language queries (e.g., "Show me today's astronomy picture")
+- 🖼️ Automatic image display for NASA photos
+- 📱 Responsive design for desktop and mobile
+- ⚡ Real-time data from NASA APIs
+
+#### Step 5: Connect NASA with AI Models
+
+```bash
+# Use NASA tools with Gemini (requires GEMINI_API_KEY in .env)
+cd mcp-client/clients/gemini
+python client_gemini_http.py http://localhost:8001
+
+# Ask questions like:
+# "Get today's astronomy picture and explain what we're seeing"
+# "Show me recent photos from the Curiosity rover"
+# "What asteroids are approaching Earth this week?"
+```
+
+### NASA Tools Available
+
+1. **get_astronomy_picture_of_the_day**
+   - Get NASA's daily space image with explanation
+   - Optional date parameter (YYYY-MM-DD format)
+
+2. **search_mars_rover_photos**
+   - Browse photos from Mars rovers (Curiosity, Perseverance, etc.)
+   - Parameters: rover_name, sol (Martian day), optional camera
+
+3. **get_near_earth_objects**
+   - Track asteroids and comets approaching Earth
+   - Parameters: start_date, end_date (YYYY-MM-DD format)
+
+### Learning Objectives
+
+This NASA integration teaches:
+- ✅ **MCP Server Development**: Building servers with multiple tools
+- ✅ **HTTP Transport**: Wrapping MCP servers for remote access
+- ✅ **Web Development**: Modern web UI with Streamlit and custom CSS
+- ✅ **Image Handling**: Loading and displaying images from URLs
+- ✅ **API Integration**: Working with external REST APIs (NASA)
+- ✅ **Error Handling**: Robust error handling and user feedback
+- ✅ **Natural Language Processing**: Query parsing and intelligent tool selection
+- ✅ **Process Management**: Starting and managing multiple processes
+
+### Improved Organization
+
+This structure reflects better separation of concerns:
+- **`mcp-server/`**: All server-side components (MCP servers + their HTTP wrappers)
+- **`mcp-client/`**: All client-side components (AI clients + web applications)
+- **Root level**: Project configuration, documentation, and testing
+
+### NASA API Notes
+
+- **API Key**: Currently uses NASA's DEMO_KEY which has rate limits
+- **Production**: Get a free API key at https://api.nasa.gov/ for higher limits
+- **Rate Limits**: DEMO_KEY allows 30 requests per hour, 50 per day
+- **Testing**: Use `python test_nasa.py` to verify all components
 
 ## 🔧 API Configuration
 

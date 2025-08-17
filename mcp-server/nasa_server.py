@@ -10,10 +10,12 @@ Provides tools for accessing NASA's APIs including:
 
 import asyncio
 import json
+import os
 import sys
 from datetime import datetime, date
 from typing import Any, Dict, List, Optional
 import httpx
+from dotenv import load_dotenv
 from mcp.server.models import InitializationOptions
 from mcp.server import NotificationOptions, Server
 from mcp.types import (
@@ -23,8 +25,11 @@ from mcp.types import (
 )
 import mcp.server.stdio
 
+# Load environment variables from .env file
+load_dotenv()
+
 # NASA API key - get from https://api.nasa.gov/
-NASA_API_KEY = "DEMO_KEY"  # Replace with your actual API key for higher rate limits
+NASA_API_KEY = os.getenv("NASA_API_KEY", "DEMO_KEY")  # Load from .env file or fallback to DEMO_KEY
 
 server = Server("nasa-server")
 
@@ -73,8 +78,7 @@ async def handle_list_tools() -> List[Tool]:
                     },
                     "camera": {
                         "type": "string",
-                        "description": "Optional camera filter (e.g., 'FHAZ', 'RHAZ', 'MAST', 'CHEMCAM', 'MAHLI', 'MARDI', 'NAVCAM')",
-                        "required": False
+                        "description": "Optional camera filter (e.g., 'FHAZ', 'RHAZ', 'MAST', 'CHEMCAM', 'MAHLI', 'MARDI', 'NAVCAM')"
                     }
                 },
                 "required": ["rover_name", "sol"]
@@ -287,50 +291,95 @@ async def get_near_earth_objects(arguments: Dict[str, Any]) -> List[TextContent]
                     text=f"No Near Earth Objects found between {start_date} and {end_date}"
                 )]
             
-            result = f"""🌍 Near Earth Objects (NEOs)
+            result = f"""🌍 Near Earth Objects (NEOs) - Tile View
 📅 Date Range: {start_date} to {end_date}
 🔢 Total Objects: {element_count}
 
 """
             
-            # Process each date
+            # Collect all objects across all dates for tile view
+            all_objects = []
             for date_str, objects in near_earth_objects.items():
-                if objects:  # Only show dates with objects
-                    result += f"\n📅 {date_str}:\n"
+                for obj in objects:
+                    obj["approach_date"] = date_str  # Add the date to the object
+                    all_objects.append(obj)
+            
+            # Limit to first 12 objects for tile view
+            all_objects = all_objects[:12]
+            
+            # Create tiles in a grid format (3 columns)
+            for i, obj in enumerate(all_objects):
+                name = obj.get("name", "Unknown")
+                neo_reference_id = obj.get("neo_reference_id", "N/A")
+                approach_date = obj.get("approach_date", "N/A")
+                
+                # Get size estimates
+                estimated_diameter = obj.get("estimated_diameter", {})
+                size_km = estimated_diameter.get("kilometers", {})
+                min_size = size_km.get("estimated_diameter_min", 0)
+                max_size = size_km.get("estimated_diameter_max", 0)
+                avg_size = (min_size + max_size) / 2
+                
+                # Get close approach data
+                close_approach_data = obj.get("close_approach_data", [])
+                if close_approach_data:
+                    approach = close_approach_data[0]
+                    miss_distance_km = approach.get("miss_distance", {}).get("kilometers", "N/A")
+                    relative_velocity = approach.get("relative_velocity", {}).get("kilometers_per_hour", "N/A")
                     
-                    for obj in objects[:5]:  # Limit to 5 objects per date
-                        name = obj.get("name", "Unknown")
-                        neo_reference_id = obj.get("neo_reference_id", "N/A")
-                        
-                        # Get size estimates
-                        estimated_diameter = obj.get("estimated_diameter", {})
-                        size_km = estimated_diameter.get("kilometers", {})
-                        min_size = size_km.get("estimated_diameter_min", 0)
-                        max_size = size_km.get("estimated_diameter_max", 0)
-                        
-                        # Get close approach data
-                        close_approach_data = obj.get("close_approach_data", [])
-                        if close_approach_data:
-                            approach = close_approach_data[0]
-                            close_approach_date = approach.get("close_approach_date_full", "N/A")
-                            miss_distance_km = approach.get("miss_distance", {}).get("kilometers", "N/A")
-                            relative_velocity = approach.get("relative_velocity", {}).get("kilometers_per_hour", "N/A")
-                        else:
-                            close_approach_date = "N/A"
-                            miss_distance_km = "N/A"
-                            relative_velocity = "N/A"
-                        
-                        is_hazardous = "⚠️ POTENTIALLY HAZARDOUS" if obj.get("is_potentially_hazardous_asteroid") else "✅ Safe"
-                        
-                        result += f"""   🌌 {name}
-      🆔 ID: {neo_reference_id}
-      📏 Size: {min_size:.3f} - {max_size:.3f} km
-      📅 Closest Approach: {close_approach_date}
-      📏 Miss Distance: {miss_distance_km} km
-      🚀 Velocity: {relative_velocity} km/h
-      ⚠️ Status: {is_hazardous}
-
+                    # Format distance for readability (already in kilometers)
+                    if miss_distance_km != "N/A":
+                        try:
+                            dist_float = float(miss_distance_km)
+                            miss_distance_display = f"{dist_float:,.0f} km"
+                        except:
+                            miss_distance_display = miss_distance_km
+                    else:
+                        miss_distance_display = "N/A"
+                    
+                    # Format velocity (already in kilometers per hour)
+                    if relative_velocity != "N/A":
+                        try:
+                            vel_float = float(relative_velocity)
+                            velocity_display = f"{vel_float:,.0f} km/h"
+                        except:
+                            velocity_display = relative_velocity
+                    else:
+                        velocity_display = "N/A"
+                else:
+                    miss_distance_display = "N/A"
+                    velocity_display = "N/A"
+                
+                # Determine hazard status and icon
+                is_hazardous = obj.get("is_potentially_hazardous_asteroid", False)
+                hazard_icon = "⚠️" if is_hazardous else "✅"
+                hazard_text = "HAZARDOUS" if is_hazardous else "Safe"
+                
+                # Size category for visual representation
+                if avg_size > 1.0:
+                    size_icon = "🌕"  # Large
+                elif avg_size > 0.1:
+                    size_icon = "�"  # Medium
+                else:
+                    size_icon = "🌗"  # Small
+                
+                # Create tile with border
+                tile_border = "═" * 45
+                result += f"""
+╔{tile_border}╗
+║ {size_icon} {name[:35]:<35} ║
+║                                             ║
+║ 📅 Date: {approach_date:<29} ║
+║ 📏 Size: {avg_size:.3f} km {size_icon:<20} ║
+║ � Distance: {miss_distance_display:<26} ║
+║ 🚀 Speed: {velocity_display:<30} ║
+║ {hazard_icon} Status: {hazard_text:<29} ║
+║ 🆔 ID: {neo_reference_id[-25:]:<30} ║
+╚{tile_border}╝
 """
+            
+            if len(all_objects) == 12 and element_count > 12:
+                result += f"\n📋 Showing 12 of {element_count} objects in tile view\n"
             
             return [TextContent(type="text", text=result)]
             
